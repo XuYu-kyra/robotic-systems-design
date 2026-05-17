@@ -2,7 +2,7 @@
 
 This repository is a portfolio-style showcase of my contribution to the team project **AERO62520 Robotic Systems Design Project**.
 
-My goal in this repository is to make my own work easy to review. Rather than presenting the entire team codebase, I focus on the parts I designed, implemented, refined, and documented myself, especially the vision and perception pipeline used to support the robot's task flow.
+My goal in this repository is to make my own work easy to review. Rather than presenting the entire team codebase, I focus on the parts I designed, implemented, refined, validated, and documented myself, especially the vision and perception pipeline used to support the robot's task flow.
 
 ## Original Team Repository
 
@@ -42,6 +42,7 @@ I worked on:
 - improving reliability through smoothing, filtering, and multi-frame confirmation logic
 - structuring launch files and manager-style components to make the pipeline easier to run and integrate
 - preparing tooling for dataset inspection, HSV tuning, inference support, and evaluation
+- generating visual evidence videos and requirement-focused validation artifacts
 - documenting migration decisions and integration handoff details for the wider project
 
 In short, I pushed this part of the project from a basic visual detection idea toward a more usable and integration-ready perception workflow.
@@ -51,16 +52,15 @@ In short, I pushed this part of the project from a basic visual detection idea t
 According to the original repository README, the project work was split across several roles:
 
 - Design: Tom
-- Vision: XuYu
+- Vision: XuYu, Wangsiyuan
 - Manipulator: Lyuxingze
 - Navigation: Ansber
-- State Machine: Wangsiyuan
 
 This repository focuses on the **vision/perception contribution** that I completed.
 
 ## What I Built
 
-My work centered on the `Xy` section of the original repository, especially the perception pipeline and the supporting tooling used to prepare, debug, and refine it.
+My work centered on the `Xy` section of the original repository and the corresponding local robotics workspace, especially the perception pipeline and the supporting tooling used to prepare, debug, validate, and refine it.
 
 The most important thing I contributed was a practical perception workflow that could serve real robot behavior rather than remaining an isolated computer vision demo.
 
@@ -71,8 +71,9 @@ That included:
 - task-oriented classification logic for blocks and bins
 - launch configurations for different operating stages
 - debugging and visualization utilities
-- supporting scripts for calibration, dataset handling, and offline experimentation
+- supporting scripts for calibration, dataset handling, offline experimentation, and evidence rendering
 - technical documentation explaining both implementation and design choices
+- validation outputs that make the results easier to inspect visually
 
 ## My Technical Approach
 
@@ -96,6 +97,7 @@ The contribution in this repository was built around several concrete robotics p
 - how to reduce unstable detections that would otherwise be difficult for downstream modules to use
 - how to distinguish semantically useful objects such as bins and blocks instead of only reporting raw image blobs
 - how to package the vision pipeline so it could be launched, inspected, and handed off more cleanly within a team project
+- how to produce reproducible validation evidence instead of only informal demo footage
 
 These problems shaped both the code and the supporting documentation included here.
 
@@ -126,11 +128,37 @@ The `contribution/vision_tools/` folder contains supporting scripts for:
 
 These tools supported experimentation, debugging, iteration, and parameter tuning during development. They reflect a part of my workflow that matters in robotics practice: building the surrounding tools needed to improve system quality, not only writing the runtime nodes.
 
-### 3. Migration Notes
+### 3. Validation And Evidence Tooling
+
+The `contribution/evidence_tools/` folder contains the scripts I used to turn experiments and ROS bag runs into reviewable evidence.
+
+This includes scripts for:
+
+- exporting recorded ROS 2 bag footage into reusable video segments
+- analyzing block color and shape IoU performance on bag-derived frames
+- rendering overlay videos that visualize detections and pipeline behavior
+- generating requirement summary assets from measured results
+
+I included these files because they show an important part of my engineering process: I did not stop at implementing the pipeline, I also built ways to explain, verify, and present its behavior.
+
+### 4. Migration Notes
 
 The file `contribution/notes/YOLO_TO_HSV_MIGRATION_SUMMARY.md` documents a key technical transition from a heavier YOLO-plus-HSV approach toward a more lightweight HSV-first pipeline for this task setting.
 
 I included this note because it captures an important part of my engineering thinking: choosing an approach that better fits the task, deployment constraints, and debugging needs rather than defaulting to the more complex option.
+
+## Validation Evidence
+
+This repository now also includes selected validation artifacts that make the work more tangible:
+
+- `evidence/videos/main_pipeline_overlay_007.mp4`
+- `evidence/videos/block_pipeline_overlay.mp4`
+- `evidence/videos/bin_pipeline_overlay.mp4`
+- `evidence/images/vision_requirement_summary.png`
+- `evidence/docs/vision_requirement_evidence.md`
+- `evidence/docs/rosbag_offline_overlay_workflow.md`
+
+These materials are useful because they show both the final visual behavior and the workflow I used to generate reproducible evidence from recorded data.
 
 ## Why I Think This Work Is Valuable
 
@@ -142,6 +170,7 @@ I contributed work that tried to improve the full engineering usability of perce
 - improving robustness rather than relying on single-frame outputs
 - making the system easier to launch, inspect, and explain
 - leaving behind documentation that helps other people understand and reuse the work
+- packaging validation evidence in a way that makes the results easier to assess
 
 From a portfolio perspective, I see this project as a strong example of how I approach robotics software:
 
@@ -149,6 +178,7 @@ From a portfolio perspective, I see this project as a strong example of how I ap
 - I care about practical tradeoffs, not only technical complexity
 - I try to make systems easier to debug, evaluate, and extend
 - I document decisions so the work is usable by others
+- I make effort to present evidence, not only claims
 
 ## Repository Structure
 
@@ -157,10 +187,15 @@ From a portfolio perspective, I see this project as a strong example of how I ap
 ├── README.md
 ├── ATTRIBUTION.md
 ├── LICENSE
-└── contribution
-    ├── ros2_color_blob_vision
-    ├── vision_tools
-    └── notes
+├── contribution
+│   ├── ros2_color_blob_vision
+│   ├── vision_tools
+│   ├── evidence_tools
+│   └── notes
+└── evidence
+    ├── docs
+    ├── images
+    └── videos
 ```
 
 ## Attribution and Scope
