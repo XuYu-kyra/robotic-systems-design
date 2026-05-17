@@ -40,9 +40,10 @@ The main technology stack described in the team repository includes:
 According to the original repository README, the project work was split across several roles:
 
 - Design: Tom
-- Vision: XuYu, Wangsiyuan
+- Vision: XuYu
 - Manipulator: Lyuxingze
 - Navigation: Ansber
+- State Machine: Wangsiyuan
 
 This repository focuses on the **vision/perception contribution** that I completed.
 
