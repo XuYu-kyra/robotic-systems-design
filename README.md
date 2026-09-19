@@ -5,8 +5,12 @@ Portfolio extract of my perception work for **AERO62520 Robotic Systems Design P
 The team project combined perception, navigation, and manipulation for a mobile-manipulation task. My ownership was the **perception subsystem**: task-oriented block/bin detection, RGB-D localisation, temporal stabilisation, ROS 2 interfaces, and target-pose handoff toward downstream robot actions. This repository is a curated view of that contribution, not a claim of sole authorship of the full robot.
 
 - Original team repository: [Picklerick313/AERO62520_Robotic_Systems_Design_Project](https://github.com/Picklerick313/AERO62520_Robotic_Systems_Design_Project)
-- Team attribution: Design — Tom; Vision — XuYu and Wangsiyuan; Manipulator — Lyuxingze; Navigation — Ansber
+- Team roles in the original repository: Design — Tom; Vision — XuYu and Wangsiyuan; Manipulator — Lyuxingze; Navigation — Ansber
 - Detailed source attribution: [ATTRIBUTION.md](ATTRIBUTION.md)
+
+### Vision-team responsibility split
+
+Within the vision team, my responsibility was the perception subsystem documented in this portfolio: the runtime ROS 2 pipeline, HSV/RGB-D localisation, temporal stabilisation, task-facing target outputs, target-pose/TF integration, downstream handoff, and validation tooling. **Wangsiyuan primarily supported the early YOLO experimentation through data collection and dataset annotation.** This distinction keeps the team attribution intact while making the ownership of the retained work explicit.
 
 ## Hardware & Integration Scope
 
