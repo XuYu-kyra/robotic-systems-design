@@ -1,35 +1,24 @@
 # Attribution
 
-This repository contains selected materials derived from the following original team project:
+## Original Project
 
-- Repository: `Picklerick313/AERO62520_Robotic_Systems_Design_Project`
-- URL: https://github.com/Picklerick313/AERO62520_Robotic_Systems_Design_Project
+[AERO62520 Robotic Systems Design Project](https://github.com/Picklerick313/AERO62520_Robotic_Systems_Design_Project) — University of Manchester MSc Robotics team project.
 
-## Purpose of This Repository
+The team repository lists Design — Tom; Vision — XuYu and Wangsiyuan; Manipulator — Lyuxingze; Navigation — Ansber.
 
-This repository was prepared as a portfolio-style showcase of my own contribution to the team project, with a focus on the `Xy` vision and perception work.
+## Perception Contributions
 
-It is not intended to replace or obscure the original team repository.
+- XuYu developed the perception subsystem presented here: early YOLO experiments, the ROS 2 HSV/RGB-D pipeline, temporal filtering, target selection, target-pose/TF integration, handoff interfaces, and validation tools.
+- Wangsiyuan contributed training-image collection and dataset annotation in Roboflow during the early YOLO stage.
 
-## Included Derived Materials
+## Source Mapping
 
-Selected files were copied from the original repository, especially from:
+| Portfolio directory | Original team repository path |
+| --- | --- |
+| `contribution/ros2_color_blob_vision/` | `Xy/ros_nd2/src/color_blob_vision/` |
+| `contribution/vision_tools/` | `Xy/Xy/tools/` |
+| `contribution/notes/YOLO_TO_HSV_MIGRATION_SUMMARY.md` | `Xy/ros_nd2/YOLO_TO_HSV_MIGRATION_SUMMARY.md` |
 
-- `Xy/ros_nd2/src/color_blob_vision`
-- `Xy/Xy/tools`
-- `Xy/ros_nd2/YOLO_TO_HSV_MIGRATION_SUMMARY.md`
+## License
 
-These materials are included here to make my contribution easier to review in one place.
-
-## Vision-Team Responsibility Split
-
-The original team repository lists both **XuYu** and **Wangsiyuan** under Vision. Within that shared team label, the work represented in this portfolio was divided as follows:
-
-- **XuYu:** perception subsystem implementation and integration, including the ROS 2 HSV/RGB-D runtime pipeline, temporal filtering, structured target outputs, target-pose/TF work, downstream handoff, and validation/evidence tooling.
-- **Wangsiyuan:** primary support during the early YOLO experimentation through data collection and image annotation in Roboflow.
-
-This repository does not claim Wangsiyuan's separate work as XuYu's contribution.
-
-## Licensing Note
-
-The original repository includes an MIT license. A copy of that license has been preserved in this repository as `LICENSE`.
+The original repository's MIT license is preserved in [LICENSE](LICENSE).

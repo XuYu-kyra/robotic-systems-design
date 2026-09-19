@@ -1,24 +1,22 @@
 # 从 YOLO + HSV 到 HSV-first 的系统级技术取舍
 
-## 1. 结论与证据边界
+## 1. 系统背景与选择
 
-本次迁移不是“YOLO 做不出来，所以退回简单视觉”。前期工作保留了可运行的 YOLO + HSV 推理脚本、数据集处理和 HSV 标定工具，说明 learning-based detector 是实际探索过的方向。
+前期采用 YOLO 检测目标形状，再在检测框内通过 HSV 判断颜色。相关推理、数据集处理和 HSV 标定脚本保留在 `contribution/vision_tools/`。
 
 后来在真实机器人系统集成阶段，导航、机械臂和感知需要共享计算资源；任务场景中的目标颜色又较受控。与老师讨论后，运行时主线因此改为依赖更少、参数更透明、现场更容易调试的 HSV-first pipeline。这是 **resource-aware / system-level engineering trade-off**。
-
-重要限制：本仓库没有保存原机器人或开发机上的成对延迟 benchmark、完整 profiling 日志或部署记录。因此，下文不把任何具体帧耗时写成项目实测结果，也不声称在原机器人上部署了 YOLO/TensorRT。
 
 ## 2. 两条技术路线
 
 ### 2.1 前期：YOLO + HSV
 
-保留证据：
+实现：
 
 - `contribution/vision_tools/infer_yolo_hsv.py` 使用 Ultralytics YOLO 产生目标框。
 - `HSVColorEstimator` 在检测框 ROI 内估计颜色。
 - `rs_bag_to_frames.py`、数据集拆分、标注和分析脚本支持训练与实验流程。
 
-典型输出把语义类别和颜色组合起来。该方向的优势是语义/形状能力更强，但需要模型权重和推理运行时；本 portfolio 仓库没有包含训练权重，也没有证明它曾在原机器人上正式部署。
+输出组合目标类别与颜色。该路线需要模型权重和推理运行时；本仓库保留了实验脚本，未包含训练权重。
 
 ### 2.2 后期主线：HSV-first RGB-D perception
 
@@ -44,7 +42,7 @@
 
 ### 3.1 共享计算与部署约束
 
-YOLO 路线需要模型权重、Ultralytics/PyTorch 等依赖并执行神经网络推理。HSV 路线主要依赖 OpenCV 和 YAML 阈值。一般来说，后者计算路径更轻、依赖更少；但由于仓库内没有同机 benchmark，只能把这写成架构层面的预期，不能写成项目测得的毫秒数字。
+YOLO 路线需要模型权重、Ultralytics/PyTorch 等依赖并执行神经网络推理。HSV 路线主要依赖 OpenCV 和 YAML 阈值。选择后者的目的是降低共享计算资源的压力，并简化部署。仓库未保存同机对比 benchmark，因此这里不报告具体延迟或加速比。
 
 ### 3.2 任务先验
 
@@ -82,18 +80,5 @@ HSV 阈值、ROI、面积、深度和确认帧数都能直接配置和可视化�
 - HSV 对光照和同色背景敏感。
 - 3D 尺寸分类使用经验阈值，不等于经过完整标定的语义分类器。
 - 仓库没有保存可以复核 YOLO 与 HSV 性能差异的同机 benchmark。
-- TF 安装参数仍含工程假设；没有完成最终手眼标定和真实机械臂闭环验证。
+- TF 安装参数仍含工程假设，需要在最终硬件上标定和验证。
 - `task_manager` 的保留版本发布 nav/arm 命令，但没有消费真实执行成功/失败反馈。
-
-## 7. 正确的项目表述
-
-推荐：
-
-> Explored a YOLO + HSV perception path, then selected an HSV-first RGB-D pipeline as a resource-aware system trade-off for a controlled-colour mobile-manipulation task. Implemented ROS 2 2D/3D outputs, temporal stabilisation, target-pose/TF integration logic, and downstream handoff interfaces.
-
-不要表述为：
-
-- failed YOLO model, so switched to simple vision
-- benchmarked HSV below 10 ms on the robot
-- deployed YOLO/TensorRT on the original robot
-- completed end-to-end physical grasping

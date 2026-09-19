@@ -1,20 +1,12 @@
-# Vision Requirement Evidence — Provenance and Limitations
+# Vision Evaluation Results
 
-This note separates retained artifacts from claims that can be independently reproduced from this portfolio repository.
+This note records offline evaluation results reported in the original development workspace, alongside the scripts and demonstration videos.
 
-## Evidence boundary
+## Reproduction Requirements
 
-The repository contains the evaluation/rendering scripts, three overlay videos, a generated requirement-summary image, and the ROS 2 perception code. It does **not** contain the labelled datasets, ground-truth CSV files, YOLO weights, or source RealSense/ROS 2 bags referenced by the original absolute paths.
+The labelled images, ground-truth CSV files, model weights, and source bags are not included in this repository. The figures below have not been independently rerun from this checkout. The summary-card renderer embeds these reported values; the overlay videos illustrate pipeline behaviour qualitatively.
 
-Therefore:
-
-- the numerical results below are historical results recorded from the original local workspace;
-- they are not independently reproducible from this portfolio repository alone;
-- the overlay videos are qualitative demonstrations of recorded-data processing, not proof of physical grasp success;
-- the generated summary card contains hard-coded historical metrics and should not be treated as a raw experiment log;
-- position accuracy and end-to-end task success remain unsupported.
-
-One preserved inconsistency is also important: `contribution/vision_tools/color_evaluate.py` is a YOLO + HSV evaluator and does not implement the HSV-only command interface previously shown in this note. The HSV/blob logic used by the later evidence scripts is preserved elsewhere in `contribution/evidence_tools/`, but the original datasets required to rerun the reported numbers are absent. The commands previously shown are therefore not presented as reproducible portfolio instructions.
+The packaged `contribution/vision_tools/color_evaluate.py` is the earlier YOLO + HSV evaluator, not the HSV-only evaluator referenced by the original evaluation notes. In addition, `analyze_rosbag_block_color.py` imports `detect_color_blobs` and `load_hsv_ranges` from `color_evaluate`, but those functions are absent from the packaged version. Reproducing that workflow requires the matching evaluator version as well as the source data.
 
 ## Historical reported results
 
@@ -45,9 +37,9 @@ Historical shape/IoU evaluation referred to:
 - `datasets/shapes/cube_seperated_dataset/labels/test`
 - `contribution/evidence_tools/shape_evaluate.py`
 
-Historical bin-colour evaluation referred to `color_gt_bin.csv`. The recorded CSV summary was 499 rows / 497 unique filenames, but only 262 referenced red/blue images were locally available at the time; 235 yellow images were missing. The red/blue result must not be presented as full red/blue/yellow validation.
+Historical bin-colour evaluation referred to `color_gt_bin.csv`. The recorded CSV summary was 499 rows / 497 unique filenames, but only 262 referenced red/blue images were locally available at the time; 235 yellow images were missing. These results cover the red/blue subset.
 
-## What the retained artifacts do demonstrate
+## Available Implementation and Recordings
 
 - HSV-based 2D detections and task labels on recorded imagery
 - aligned-depth and camera-intrinsics code paths for 3D localisation
@@ -56,7 +48,7 @@ Historical bin-colour evaluation referred to `color_gt_bin.csv`. The recorded CS
 - debug overlays and pipeline-state visualisation
 - a task-state prototype driven by recorded perception inputs
 
-## What they do not demonstrate
+## Evaluation Gaps
 
 - calibrated ±50 mm 3D accuracy
 - a validated camera-to-`base_link` transform on the final robot
