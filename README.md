@@ -10,7 +10,7 @@ The team project combined perception, navigation, and manipulation for a mobile-
 
 ### Vision-team responsibility split
 
-Within the vision team, my responsibility was the perception subsystem documented in this portfolio: the runtime ROS 2 pipeline, HSV/RGB-D localisation, temporal stabilisation, task-facing target outputs, target-pose/TF integration, downstream handoff, and validation tooling. **Wangsiyuan primarily supported the early YOLO experimentation through data collection and dataset annotation.** This distinction keeps the team attribution intact while making the ownership of the retained work explicit.
+Within the vision team, my responsibility was the perception subsystem documented in this portfolio: the runtime ROS 2 pipeline, HSV/RGB-D localisation, temporal stabilisation, task-facing target outputs, target-pose/TF integration, downstream handoff, and validation tooling. **Wangsiyuan primarily supported the early YOLO experimentation through data collection and image annotation in Roboflow.** This distinction keeps the team attribution intact while making the ownership of the retained work explicit.
 
 ## Hardware & Integration Scope
 

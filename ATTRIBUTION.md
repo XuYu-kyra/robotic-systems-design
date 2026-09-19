@@ -26,9 +26,9 @@ These materials are included here to make my contribution easier to review in on
 The original team repository lists both **XuYu** and **Wangsiyuan** under Vision. Within that shared team label, the work represented in this portfolio was divided as follows:
 
 - **XuYu:** perception subsystem implementation and integration, including the ROS 2 HSV/RGB-D runtime pipeline, temporal filtering, structured target outputs, target-pose/TF work, downstream handoff, and validation/evidence tooling.
-- **Wangsiyuan:** primary support during the early YOLO experimentation through data collection and dataset annotation.
+- **Wangsiyuan:** primary support during the early YOLO experimentation through data collection and image annotation in Roboflow.
 
-The annotation platform is not named because it is not established by the retained repository evidence. This repository does not claim Wangsiyuan's separate work as XuYu's contribution.
+This repository does not claim Wangsiyuan's separate work as XuYu's contribution.
 
 ## Licensing Note
 
