@@ -1,184 +1,104 @@
-# Robotic Systems Design
+# Robotic Systems Design — ROS 2 RGB-D Perception
 
-This repository is a portfolio-style showcase of my contribution to the team project **AERO62520 Robotic Systems Design Project**.
+Portfolio extract of my perception work for **AERO62520 Robotic Systems Design Project**, a year-long University of Manchester MSc Robotics team project built around a physical **Leo Rover**, **myCobot 280 Pi**, and **RealSense RGB-D camera**.
 
-My goal in this repository is to make my own work easy to review. Rather than presenting the entire team codebase, I focus on the parts I designed, implemented, refined, validated, and documented myself, especially the vision and perception pipeline used to support the robot's task flow.
+The team project combined perception, navigation, and manipulation for a mobile-manipulation task. My ownership was the **perception subsystem**: task-oriented block/bin detection, RGB-D localisation, temporal stabilisation, ROS 2 interfaces, and target-pose handoff toward downstream robot actions. This repository is a curated view of that contribution, not a claim of sole authorship of the full robot.
 
-## Original Team Repository
+- Original team repository: [Picklerick313/AERO62520_Robotic_Systems_Design_Project](https://github.com/Picklerick313/AERO62520_Robotic_Systems_Design_Project)
+- Team attribution: Design — Tom; Vision — XuYu and Wangsiyuan; Manipulator — Lyuxingze; Navigation — Ansber
+- Detailed source attribution: [ATTRIBUTION.md](ATTRIBUTION.md)
 
-Source project:
+## Hardware & Integration Scope
 
-- https://github.com/Picklerick313/AERO62520_Robotic_Systems_Design_Project
-
-## Project Overview
-
-The original project combines **mobile robotics, perception, navigation, and manipulation** into a single robotic system built around a **Leo Rover** and **myCobot 280 Pi** platform.
-
-At a high level, the project aimed to build a robot that could:
-
-- perform SLAM and autonomous navigation
-- detect task-relevant objects and bins using vision
-- estimate object positions for downstream robot actions
-- support pick-and-place style task flows
-- integrate multiple subsystems through ROS 2
-
-The main technology stack described in the team repository includes:
-
-- ROS 2 Jazzy
-- Nav2
-- MoveIt 2
-- Cartographer
-- RGB-D perception tools
+| Area | Repository-backed scope |
+| --- | --- |
+| Robot context | Physical Leo Rover + myCobot 280 Pi mobile-manipulation project |
+| Sensor path | RealSense-style RGB, aligned depth, and camera intrinsics; recorded RealSense/ROS 2 bag workflows |
+| My ownership | Perception package, supporting vision/evidence tools, task-facing target selection, and handoff documentation |
+| Spatial output | 2D detections projected to metric 3D; `Detection3DArray` and selected `PoseStamped` target output |
+| Frame integration | `perception_manager.py` looks up TF and transforms a selected pose into configurable `target_frame`; offline mode can retain the camera/source frame when TF is unavailable |
+| Downstream handoff | `/task/current_target_pose` feeds `/task/arm_target_pose`; semantic arm and navigation command topics are documented |
+| Boundary | Perception-to-manipulator interface work is present, but the final physical-arm success/failure loop and end-to-end real grasp were not completed in the original project |
 
 ## My Contribution At A Glance
 
-My contribution focused on building a perception subsystem that was not just able to detect colors in an image, but could provide outputs that were much more useful for a full robotics pipeline.
+- Built ROS 2 HSV-based object/bin detection for white, red, blue, and yellow task targets.
+- Converted 2D blob centres and bounding boxes into 3D camera-frame positions using aligned depth and `CameraInfo` intrinsics.
+- Added median depth sampling, metric-size classification, spatial filtering, lightweight tracking, exponential smoothing, and multi-frame confirmation.
+- Published task-facing labels, visibility/reachability state, and `geometry_msgs/msg/PoseStamped` targets.
+- Implemented configurable TF lookup and coordinate transformation toward a robot frame such as `base_link`.
+- Defined manipulator handoff topics (`/task/arm_command`, `/task/arm_target_pose`) and navigation intent (`/task/nav_goal_name`).
+- Used RViz/debug images, ROS 2 bag replay, timestamped recordings, and overlay/evaluation tools to inspect system behaviour.
+- Explored a learning-based YOLO + HSV detector before selecting an HSV-first runtime pipeline as a resource-aware system trade-off.
 
-I worked on:
+## Validated vs Integration Scope
 
-- designing and implementing a ROS 2 perception package for task-oriented color detection
-- building HSV-based detection workflows for white bins and colored blocks
-- converting 2D image detections into 3D spatial estimates using depth information
-- improving reliability through smoothing, filtering, and multi-frame confirmation logic
-- structuring launch files and manager-style components to make the pipeline easier to run and integrate
-- preparing tooling for dataset inspection, HSV tuning, inference support, and evaluation
-- generating visual evidence videos and requirement-focused validation artifacts
-- documenting migration decisions and integration handoff details for the wider project
+### Demonstrated in the retained artifacts
 
-In short, I pushed this part of the project from a basic visual detection idea toward a more usable and integration-ready perception workflow.
+- ROS 2 perception nodes and launch configuration
+- task-oriented block/bin colour detection
+- RealSense-style RGB + aligned-depth 2D-to-3D localisation
+- temporal smoothing and multi-frame confirmation
+- structured `Detection2DArray`, `Detection3DArray`, and `PoseStamped` outputs
+- rosbag/offline pipeline validation and visual overlays
 
-## Team Context
+### Implemented as integration work
 
-According to the original repository README, the project work was split across several roles:
+- target selection and target-pose interfaces
+- configurable `target_frame` plus TF transformation logic
+- perception-to-task-manager data flow
+- manipulator and navigation command/handoff contracts
 
-- Design: Tom
-- Vision: XuYu, Wangsiyuan
-- Manipulator: Lyuxingze
-- Navigation: Ansber
+### Not completed in the original project
 
-This repository focuses on the **vision/perception contribution** that I completed.
+- calibrated, validated camera-to-robot TF for final hardware execution
+- real navigation/manipulator completion feedback consumed by `task_manager`
+- perception → physical arm → grasp → real success/failure closed loop
+- deployment of YOLO/TensorRT on the original robot
 
-## What I Built
+The current `task_manager.py` can publish outward commands and target poses, but its retained implementation advances navigation and arm states through simulated timing. With `simulate_nav:=false` or `simulate_arm:=false`, real result subscribers still need to be implemented. The handoff is therefore **partial integration**, not a completed robot-execution loop.
 
-My work centered on the `Xy` section of the original repository and the corresponding local robotics workspace, especially the perception pipeline and the supporting tooling used to prepare, debug, validate, and refine it.
+## System Data Flow
 
-The most important thing I contributed was a practical perception workflow that could serve real robot behavior rather than remaining an isolated computer vision demo.
+1. RGB image → HSV segmentation, contour filtering, 2D bounding boxes and orientation
+2. Aligned depth + camera intrinsics → metric 3D position and approximate object size
+3. Size/depth rules → `block:<color>` or `bin:<color>`
+4. Multi-frame association + smoothing → stable `Detection3DArray`
+5. Target policy + TF lookup → selected `PoseStamped` in the configured frame
+6. `task_manager` → semantic navigation/arm commands and arm target pose
 
-That included:
+Relevant implementation:
 
-- a ROS 2 package for color-based perception
-- RGB-D based 3D position estimation from 2D detections
-- task-oriented classification logic for blocks and bins
-- launch configurations for different operating stages
-- debugging and visualization utilities
-- supporting scripts for calibration, dataset handling, offline experimentation, and evidence rendering
-- technical documentation explaining both implementation and design choices
-- validation outputs that make the results easier to inspect visually
+- [`color_blob_detector.py`](contribution/ros2_color_blob_vision/color_blob_vision/color_blob_detector.py)
+- [`blob_depth_to_3d_smoothed.py`](contribution/ros2_color_blob_vision/color_blob_vision/blob_depth_to_3d_smoothed.py)
+- [`perception_manager.py`](contribution/ros2_color_blob_vision/color_blob_vision/perception_manager.py)
+- [`task_manager.py`](contribution/ros2_color_blob_vision/color_blob_vision/task_manager.py)
+- [`vision_pipeline_manager.launch.py`](contribution/ros2_color_blob_vision/launch/vision_pipeline_manager.launch.py)
 
-## My Technical Approach
+## Resource-Aware YOLO → HSV Decision
 
-My design approach was shaped by a practical robotics constraint: perception is only useful if downstream modules can consume it reliably.
+The earlier work includes a functional YOLO + HSV inference path and dataset/calibration tooling. The move to HSV-first perception was not a failed-model fallback. Navigation, manipulation, and perception had to share compute on the robot, while the task used controlled target colours and benefited from transparent, quickly tunable failure modes. After discussion with the supervisor, I chose the lighter pipeline to reduce runtime dependencies and make integration and debugging more predictable.
 
-Because of that, I did not focus only on detecting colored regions. I focused on making perception outputs:
+The repository does **not** contain device benchmark logs supporting exact YOLO-versus-HSV latency figures, so the migration note treats performance differences as expected characteristics rather than measured results. It also does not include the trained weights needed to claim YOLO deployment on the original robot.
 
-- lightweight enough to run practically
-- interpretable and easy to debug
-- stable enough to reduce frame-to-frame flicker
-- structured in a way that navigation and manipulation modules could actually use
+See [`YOLO_TO_HSV_MIGRATION_SUMMARY.md`](contribution/notes/YOLO_TO_HSV_MIGRATION_SUMMARY.md).
 
-This is also why part of my work involved moving toward an HSV-first pipeline in this task setting. A simpler and more controllable perception pipeline can be a better engineering choice than a heavier model-based approach when the task is strongly color-driven and integration reliability matters.
+## Tooling and Evidence
 
-## Problems I Helped Solve
+`contribution/vision_tools/` contains dataset inspection/splitting, RealSense bag frame extraction, HSV calibration, labelling, evaluation, and YOLO + HSV inference utilities.
 
-The contribution in this repository was built around several concrete robotics problems:
+`contribution/evidence_tools/` contains ROS 2 bag export, recorded-frame rendering, overlay generation, 2D/3D output extraction, and colour/shape analysis utilities.
 
-- how to detect task-relevant targets without depending on a heavy inference stack for every step
-- how to transform 2D detections into 3D positions meaningful for robot action
-- how to reduce unstable detections that would otherwise be difficult for downstream modules to use
-- how to distinguish semantically useful objects such as bins and blocks instead of only reporting raw image blobs
-- how to package the vision pipeline so it could be launched, inspected, and handed off more cleanly within a team project
-- how to produce reproducible validation evidence instead of only informal demo footage
+Selected retained artifacts:
 
-These problems shaped both the code and the supporting documentation included here.
+- [Main pipeline overlay](evidence/videos/main_pipeline_overlay_007.mp4)
+- [Block pipeline overlay](evidence/videos/block_pipeline_overlay.mp4)
+- [Bin pipeline overlay](evidence/videos/bin_pipeline_overlay.mp4)
+- [Historical requirement summary](evidence/images/vision_requirement_summary_requirements_videos.png)
+- [Evidence provenance and limitations](evidence/docs/vision_requirement_evidence.md)
+- [ROS 2 bag overlay workflow](evidence/docs/rosbag_offline_overlay_workflow.md)
 
-## Selected Technical Highlights
-
-### 1. ROS 2 Perception Package
-
-The `contribution/ros2_color_blob_vision/` folder contains the curated ROS 2 package and related notes from my contribution. This part includes:
-
-- `color_blob_detector.py` for HSV-based color segmentation and blob detection
-- `blob_depth_to_3d.py` and `blob_depth_to_3d_smoothed.py` for RGB-D based 3D projection
-- launch files for different runtime modes
-- manager and debugging utilities
-- handoff notes for integration with other subsystems
-
-My work here was aimed at turning raw image detections into outputs that were much more useful for robot behavior, integration, and debugging.
-
-The core value of this package is not just that it detects colored objects. It is that it tries to bridge sensing and action by producing structured outputs that better match what the robot actually needs downstream.
-
-### 2. Vision Tooling
-
-The `contribution/vision_tools/` folder contains supporting scripts for:
-
-- dataset analysis and splitting
-- frame extraction from RealSense recordings
-- HSV calibration and adjustment
-- color evaluation and combined inference workflows
-
-These tools supported experimentation, debugging, iteration, and parameter tuning during development. They reflect a part of my workflow that matters in robotics practice: building the surrounding tools needed to improve system quality, not only writing the runtime nodes.
-
-### 3. Validation And Evidence Tooling
-
-The `contribution/evidence_tools/` folder contains the scripts I used to turn experiments and ROS bag runs into reviewable evidence.
-
-This includes scripts for:
-
-- exporting recorded ROS 2 bag footage into reusable video segments
-- analyzing block color and shape IoU performance on bag-derived frames
-- rendering overlay videos that visualize detections and pipeline behavior
-- generating requirement summary assets from measured results
-
-I included these files because they show an important part of my engineering process: I did not stop at implementing the pipeline, I also built ways to explain, verify, and present its behavior.
-
-### 4. Migration Notes
-
-The file `contribution/notes/YOLO_TO_HSV_MIGRATION_SUMMARY.md` documents a key technical transition from a heavier YOLO-plus-HSV approach toward a more lightweight HSV-first pipeline for this task setting.
-
-I included this note because it captures an important part of my engineering thinking: choosing an approach that better fits the task, deployment constraints, and debugging needs rather than defaulting to the more complex option.
-
-## Validation Evidence
-
-This repository now also includes selected validation artifacts that make the work more tangible:
-
-- `evidence/videos/main_pipeline_overlay_007.mp4`
-- `evidence/videos/block_pipeline_overlay.mp4`
-- `evidence/videos/bin_pipeline_overlay.mp4`
-- `evidence/images/vision_requirement_summary.png`
-- `evidence/docs/vision_requirement_evidence.md`
-- `evidence/docs/rosbag_offline_overlay_workflow.md`
-
-These materials are useful because they show both the final visual behavior and the workflow I used to generate reproducible evidence from recorded data.
-
-## Why I Think This Work Is Valuable
-
-What I am most proud of in this contribution is that it goes beyond isolated vision logic.
-
-I contributed work that tried to improve the full engineering usability of perception by:
-
-- connecting image-level detection with spatial reasoning
-- improving robustness rather than relying on single-frame outputs
-- making the system easier to launch, inspect, and explain
-- leaving behind documentation that helps other people understand and reuse the work
-- packaging validation evidence in a way that makes the results easier to assess
-
-From a portfolio perspective, I see this project as a strong example of how I approach robotics software:
-
-- I build for integration, not only for demos
-- I care about practical tradeoffs, not only technical complexity
-- I try to make systems easier to debug, evaluate, and extend
-- I document decisions so the work is usable by others
-- I make effort to present evidence, not only claims
+Evidence boundary: the videos and scripts are retained, but the labelled datasets, CSV files, model weights, and source bags referenced by local paths are not packaged here. Reported metrics are therefore historical results from the original workspace, not independently reproducible benchmarks from this portfolio repository alone.
 
 ## Repository Structure
 
@@ -186,7 +106,6 @@ From a portfolio perspective, I see this project as a strong example of how I ap
 .
 ├── README.md
 ├── ATTRIBUTION.md
-├── LICENSE
 ├── contribution
 │   ├── ros2_color_blob_vision
 │   ├── vision_tools
@@ -198,20 +117,8 @@ From a portfolio perspective, I see this project as a strong example of how I ap
     └── videos
 ```
 
-## Attribution and Scope
+## Attribution and License
 
-This was a **team project**, and I am not claiming sole authorship of the entire system.
+This was a team project. I do not claim ownership of the navigation, manipulation, mechanical design, or the complete system. The curated files here correspond primarily to the original repository's `Xy` perception work and are linked back to the team source.
 
-This repository is intended to make my own contribution easier to review by:
-
-- summarizing the full project at a high level
-- isolating the files most closely related to my work
-- preserving a clear reference to the original project source
-
-For the complete project context, team structure, and the full repository contents, please refer to the original team repository:
-
-- https://github.com/Picklerick313/AERO62520_Robotic_Systems_Design_Project
-
-## License
-
-Selected files in this repository are derived from the original team repository, which includes an MIT license. The original license text is preserved in [`LICENSE`](LICENSE), and additional source attribution is documented in [`ATTRIBUTION.md`](ATTRIBUTION.md).
+The original repository's `LICENSE` file is MIT-licensed, and that license is preserved here. The badge in the original team README says Apache 2.0, but the actual license file contains the MIT License; this repository follows the license file.

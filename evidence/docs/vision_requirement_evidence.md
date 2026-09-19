@@ -1,145 +1,74 @@
-# Vision Requirement Evidence
+# Vision Requirement Evidence — Provenance and Limitations
 
-This note records the current offline evidence that can be reproduced from the repository.
+This note separates retained artifacts from claims that can be independently reproduced from this portfolio repository.
 
-## Supported requirements
+## Evidence boundary
 
-### 1.1 Block colour accuracy >= 60%
+The repository contains the evaluation/rendering scripts, three overlay videos, a generated requirement-summary image, and the ROS 2 perception code. It does **not** contain the labelled datasets, ground-truth CSV files, YOLO weights, or source RealSense/ROS 2 bags referenced by the original absolute paths.
 
-Data:
-- Ground truth: `color_gt.csv`
-- Images: `datasets/shapes/images_all/images`
-- Method: current HSV/blob detector in `tools/color_evaluate.py`
+Therefore:
 
-Command:
+- the numerical results below are historical results recorded from the original local workspace;
+- they are not independently reproducible from this portfolio repository alone;
+- the overlay videos are qualitative demonstrations of recorded-data processing, not proof of physical grasp success;
+- the generated summary card contains hard-coded historical metrics and should not be treated as a raw experiment log;
+- position accuracy and end-to-end task success remain unsupported.
 
-```bash
-./env_robot/bin/python tools/color_evaluate.py \
-  --gt-csv /home/student24/robotproject/color_gt.csv \
-  --img-dir /home/student24/robotproject/datasets/shapes/images_all/images \
-  --hsv-cfg /home/student24/robotproject/tools/color_ranges.yaml
-```
+One preserved inconsistency is also important: `contribution/vision_tools/color_evaluate.py` is a YOLO + HSV evaluator and does not implement the HSV-only command interface previously shown in this note. The HSV/blob logic used by the later evidence scripts is preserved elsewhere in `contribution/evidence_tools/`, but the original datasets required to rerun the reported numbers are absent. The commands previously shown are therefore not presented as reproducible portfolio instructions.
 
-Result:
-- Ground-truth instances: `2277`
-- Accuracy: `74.70%`
+## Historical reported results
 
-Conclusion:
-- Requirement `1.1` is supported by current offline evidence.
+| Requirement | Historical result | Portfolio evidence status |
+| --- | --- | --- |
+| Block colour accuracy ≥ 60% | 2,277 GT instances; 74.70% accuracy | Reported from original workspace; dataset/CSV not packaged |
+| Block colour F1 ≥ 0.6 | weighted F1 0.7690 | Reported from original workspace; dataset/CSV not packaged |
+| Shape precision ≥ 0.5 | 141 held-out GT instances; precision 0.5563 | Evaluation code retained; train/test data not packaged |
+| Blob IoU > 0.5 | 114/141 matched at IoU ≥ 0.50; mean IoU 0.7432 | Evaluation code retained; test data not packaged |
+| Bin colour precision ≥ 0.5 | red/blue subset weighted precision 1.0000 | Partial historical subset only; yellow images were already missing |
+| Bin colour F1 ≥ 0.6 | red/blue subset weighted F1 0.9981 | Partial historical subset only; not full three-colour evidence |
+| Position error within ±50 mm | No calibrated 3D ground truth | Not supported |
+| End-to-end matching accuracy > 70% | No repeated task-level success log | Not supported |
 
-### 1.2 Block colour F1 >= 0.6
+## Original-workspace data references
 
-Same run as `1.1`.
+Historical block-colour evaluation referred to:
 
-Result:
-- Weighted F1: `0.7690`
+- `color_gt.csv`
+- `datasets/shapes/images_all/images`
+- local HSV/blob evaluation tooling
 
-Conclusion:
-- Requirement `1.2` is supported by current offline evidence.
+Historical shape/IoU evaluation referred to:
 
-### 2.1 Shape classification precision >= 0.5
+- `datasets/shapes/cube_seperated_dataset/images/train`
+- `datasets/shapes/cube_seperated_dataset/labels/train`
+- `datasets/shapes/cube_seperated_dataset/images/test`
+- `datasets/shapes/cube_seperated_dataset/labels/test`
+- `contribution/evidence_tools/shape_evaluate.py`
 
-Data:
-- Train split: `datasets/shapes/cube_seperated_dataset/images/train`
-- Train labels: `datasets/shapes/cube_seperated_dataset/labels/train`
-- Test split: `datasets/shapes/cube_seperated_dataset/images/test`
-- Test labels: `datasets/shapes/cube_seperated_dataset/labels/test`
-- Classes: `cube`, `rectangle_prism`, `triangle_prism`, `cylinder`, `arch`
+Historical bin-colour evaluation referred to `color_gt_bin.csv`. The recorded CSV summary was 499 rows / 497 unique filenames, but only 262 referenced red/blue images were locally available at the time; 235 yellow images were missing. The red/blue result must not be presented as full red/blue/yellow validation.
 
-Method:
-- HSV blob detection for candidate contours
-- Contour-derived features: aspect ratio, extent, solidity, circularity, polygon vertex counts, Hu moments
-- Lightweight contour-feature classifier in `tools/shape_evaluate.py`
+## What the retained artifacts do demonstrate
 
-Command:
+- HSV-based 2D detections and task labels on recorded imagery
+- aligned-depth and camera-intrinsics code paths for 3D localisation
+- `Detection3DArray` output extraction and recorded-run tooling
+- multi-frame smoothing/confirmation in the ROS 2 node
+- debug overlays and pipeline-state visualisation
+- a task-state prototype driven by recorded perception inputs
 
-```bash
-./env_robot/bin/python tools/shape_evaluate.py
-```
+## What they do not demonstrate
 
-Result:
-- Training contours extracted: `1377`
-- Ground-truth instances in held-out test split: `141`
-- Predicted blobs: `160`
-- Shape precision over all predicted blobs: `0.5563`
+- calibrated ±50 mm 3D accuracy
+- a validated camera-to-`base_link` transform on the final robot
+- real navigation or arm completion feedback
+- end-to-end physical grasp success
+- deployment-time YOLO/HSV latency on the original hardware
 
-Conclusion:
-- Requirement `2.1` is supported by current offline evidence.
+## Retained files
 
-### 2.2 Blob bounding-box IoU > 0.5
-
-Same run as `2.1`.
-
-Result:
-- Matched GT at IoU >= 0.50: `114/141` (`80.85%`)
-- Mean IoU over all GT: `0.7432`
-- Mean IoU over matched GT: `0.8683`
-
-Conclusion:
-- Requirement `2.2` is supported by current offline evidence.
-
-### 3.1 Bin colour precision >= 0.5
-
-Data currently available in the repository:
-- Ground truth: `color_gt_bin.csv`
-- Images found locally for this CSV: `262` instances
-- Present colours in available images: `red`, `blue`
-
-Command:
-
-```bash
-./env_robot/bin/python tools/color_evaluate.py \
-  --gt-csv /home/student24/robotproject/color_gt_bin.csv \
-  --img-dir /home/student24/robotproject/datasets/shapes \
-  --hsv-cfg /home/student24/robotproject/tools/color_ranges.yaml
-```
-
-Result on available images:
-- Ground-truth instances evaluated: `262`
-- Red precision: `1.0000`
-- Blue precision: `1.0000`
-- Weighted precision: `1.0000`
-
-Conclusion:
-- Requirement `3.1` is supported for the available `red/blue` bin subset.
-- Full three-colour support is not yet evidenced because the repository is missing the yellow-bin images referenced by `color_gt_bin.csv`.
-
-### 3.2 Bin colour F1 >= 0.6
-
-Same run as `3.1`.
-
-Result on available images:
-- Accuracy: `99.62%`
-- Red F1: `1.0000`
-- Blue F1: `0.9953`
-- Weighted F1: `0.9981`
-
-Conclusion:
-- Requirement `3.2` is supported for the available `red/blue` bin subset.
-- Full three-colour support is not yet evidenced because the repository is missing the yellow-bin images referenced by `color_gt_bin.csv`.
-
-## Not supported by current repository evidence
-
-### 2.3 Position error within +/-50 mm
-
-Missing:
-- Reliable 3D ground truth for object position
-
-### 4.1 End-to-end block/bin matching accuracy > 70%
-
-Missing:
-- Task-level success records or an end-to-end labelled evaluation protocol
-
-## Repository gap affecting bin-colour evidence
-
-`color_gt_bin.csv` currently contains:
-- `499` rows
-- `497` unique filenames
-- Colour distribution: `yellow 237`, `red 154`, `blue 108`
-
-Images present locally for those filenames:
-- `262` unique filenames found
-- Found colours: `red 154`, `blue 108`
-- Missing colours: `yellow 235`
-
-So the current repository supports a strong bin-colour evaluation for `red/blue`, but cannot yet provide complete evidence for `red/blue/yellow` bins until the missing yellow-bin images are restored.
+- `evidence/videos/main_pipeline_overlay_007.mp4`
+- `evidence/videos/block_pipeline_overlay.mp4`
+- `evidence/videos/bin_pipeline_overlay.mp4`
+- `evidence/images/vision_requirement_summary_requirements_videos.png`
+- `contribution/evidence_tools/`
+- `evidence/docs/rosbag_offline_overlay_workflow.md`
